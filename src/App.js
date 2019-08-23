@@ -10,9 +10,11 @@ class App extends React.Component {
     constructor(){
         super()
         this.state = {
+            play: false,
             breakLength: 5,
             sessionLength: 25,
-            timeLeft: 25 * 60 * 1000
+            sessionLeft: 25 * 60 * 1000,
+            breakLeft: 5 * 60 * 1000
         }
     }
 
@@ -21,36 +23,51 @@ class App extends React.Component {
         switch(id) {
             case "break-increment":
                 this.setState(state => {
-                    let {breakLength} = state
+                    let {breakLength, breakLeft} = state
                     return {
-                        breakLength: breakLength + 1
+                        breakLength: breakLength === 60 ?  breakLength = 60: breakLength + 1,
+                        breakLeft: breakLeft === 60 * 60 * 1000 ?  breakLeft = 60 * 60 * 1000: breakLeft + 60000
                     }
                 })
                 break;
             case "break-decrement":
                     this.setState(state => {
-                        let {breakLength} = state
+                        let {breakLength, breakLeft} = state
                         return {
-                            breakLength: breakLength === 0 ?  breakLength = 0: breakLength - 1
+                            breakLength: breakLength === 1 ?  breakLength = 1: breakLength - 1,
+                            breakLeft: breakLeft === 1 * 60 * 1000 ?  breakLeft = 1 * 60 * 1000 : breakLeft - 60000
                         }
                     })
                 break;
             case "session-increment":
                     this.setState(state => {
-                        let {sessionLength, timeLeft} = state
+                        let {sessionLength, sessionLeft} = state
                         return {
-                            sessionLength: sessionLength + 1,
-                            timeLeft: timeLeft + 1
+                            sessionLength: sessionLength === 60 ?  sessionLength = 60: sessionLength + 1,
+                            sessionLeft: sessionLeft === 60 * 60 * 1000 ?  sessionLeft = 60 * 60 * 1000: sessionLeft + 60000
                         }
                     })
                     break;
             case "session-decrement":
                     this.setState(state => {
-                        let {sessionLength, timeLeft} = state
+                        let {sessionLength, sessionLeft} = state
                         return {
-                            sessionLength: sessionLength === 0 ?  sessionLength = 0: sessionLength - 1,
-                            timeLeft: timeLeft === 0 ?  timeLeft = 0: timeLeft - 1
+                            sessionLength: sessionLength === 1 ?  sessionLength = 1: sessionLength - 1,
+                            sessionLeft: sessionLeft === 1 * 60 * 1000 ?  sessionLeft = 1 * 60 * 1000 : sessionLeft - 60000
                         }
+                    })
+                    break;
+            case "reset":
+                    this.setState(state => {
+                        clearInterval(this.myInterval)
+                        return {
+                            play: false,
+                            breakLength: 5,
+                            sessionLength: 25,
+                            sessionLeft: 25 * 60 * 1000,
+                            breakLeft: 5 * 60 * 1000
+                        }
+                       
                     })
                     break;
             default: 
@@ -60,11 +77,35 @@ class App extends React.Component {
     }
 
     startStopTime = () => {
-        this.myInterval = setInterval(() => {
-            this.setState(state => ({
-                timeLeft: state.timeLeft - 1000
-            }))
-        },1000)
+        let {play} = this.state
+        if (play === false) {
+            this.myInterval = setInterval(() => {
+                if (this.state.sessionLeft >= 1000){
+                    this.setState(state => {
+                        let {sessionLeft} = state
+                        return {
+                            sessionLeft: sessionLeft - 1000,
+                            play: true
+                        }     
+                    })
+                } else if (this.state.sessionLeft === 0){
+                    this.setState(state => {
+                        return {
+                            sessionLeft: 0,
+                            breakLeft: state.breakLeft === 0 ? state.breakLeft = 0 : state.breakLeft - 1000,
+                            play: true  
+                        }       
+                    })
+                }
+            },1000)
+        } else if (play === true){
+            this.setState(state => {
+                clearInterval(this.myInterval)
+                return {
+                    play: state.play = false,
+                }
+            })   
+        }  
     }
 
     render(){
@@ -90,13 +131,14 @@ class App extends React.Component {
                             </div>
                         </div>
                     </div>
-                    <div className="timer">
-                        <p id="timer-label">Session</p>
-                        <p id="time-left">{moment(this.state.timeLeft).format("mm:ss")}</p>
+                    <div className="timer">        
+                        {this.state.sessionLeft >= 1000 ? <p id="timer-label">Session</p> : <p id="timer-label">Break</p>}
+                        {this.state.sessionLeft >= 1000 ? <p id="time-left">{moment(this.state.sessionLeft).format("mm:ss")}</p> : <p id="time-left">{moment(this.state.breakLeft).format("mm:ss")}</p>}
+                        
                     </div>
                     <div className="ppr">
                         <button id="start_stop" onClick={this.startStopTime}><FontAwesomeIcon icon={faPlay} /><FontAwesomeIcon icon={faPause} /></button>
-                        <button id="reset"><FontAwesomeIcon icon={faSyncAlt} /></button>
+                        <button id="reset" onClick={this.handleClick}><FontAwesomeIcon icon={faSyncAlt} /></button>
                     </div>
                 </div>
                 <ReactFCCtest />

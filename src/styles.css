@@ -56,7 +56,8 @@ h2 {
   align-items: center;
   border: 4px solid #fd3131;
   border-radius: 50px;
-  padding: 20px 40px;
+  width: 250px;
+  height: 150px;
 }
 
 p {
