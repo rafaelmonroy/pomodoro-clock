@@ -13,8 +13,8 @@ class App extends React.Component {
             play: false,
             breakLength: 5,
             sessionLength: 25,
-            sessionLeft: 25 * 60 * 1000,
-            breakLeft: 5 * 60 * 1000
+            sessionLeft: .1 * 60 * 1000,
+            breakLeft: .1 * 60 * 1000
         }
     }
 
@@ -47,7 +47,7 @@ class App extends React.Component {
                             sessionLeft: sessionLeft === 60 * 60 * 1000 ?  sessionLeft = 60 * 60 * 1000: sessionLeft + 60000
                         }
                     })
-                    break;
+                break;
             case "session-decrement":
                     this.setState(state => {
                         let {sessionLength, sessionLeft} = state
@@ -56,7 +56,7 @@ class App extends React.Component {
                             sessionLeft: sessionLeft === 1 * 60 * 1000 ?  sessionLeft = 1 * 60 * 1000 : sessionLeft - 60000
                         }
                     })
-                    break;
+                break;
             case "reset":
                     this.setState(state => {
                         clearInterval(this.myInterval)
@@ -67,45 +67,42 @@ class App extends React.Component {
                             sessionLeft: 25 * 60 * 1000,
                             breakLeft: 5 * 60 * 1000
                         }
-                       
                     })
-                    break;
+                break;
+            case "start_stop":
+                let {play} = this.state
+                if (play === false) {
+                    this.myInterval = setInterval(() => {
+                        if (this.state.sessionLeft !== 0){
+                            this.setState(state => {
+                                let {sessionLeft} = state
+                                return {
+                                    sessionLeft: sessionLeft - 1000,
+                                    play: true
+                                }     
+                            })
+                        } else if (this.state.sessionLeft === 0){
+                            this.setState(state => {
+                                return {
+                                    sessionLeft: 0,
+                                    breakLeft: state.breakLeft === 0 ? state.breakLeft = 0 : state.breakLeft - 1000,
+                                    play: true  
+                                }       
+                            })
+                        }
+                    },1000)
+                } else if (play === true){
+                    this.setState(state => {
+                        clearInterval(this.myInterval)
+                        return {
+                            play: state.play = false,
+                        }
+                    })   
+                }
+                break;
             default: 
-            console.log("whoops")
-        }
-              
-    }
-
-    startStopTime = () => {
-        let {play} = this.state
-        if (play === false) {
-            this.myInterval = setInterval(() => {
-                if (this.state.sessionLeft >= 1000){
-                    this.setState(state => {
-                        let {sessionLeft} = state
-                        return {
-                            sessionLeft: sessionLeft - 1000,
-                            play: true
-                        }     
-                    })
-                } else if (this.state.sessionLeft === 0){
-                    this.setState(state => {
-                        return {
-                            sessionLeft: 0,
-                            breakLeft: state.breakLeft === 0 ? state.breakLeft = 0 : state.breakLeft - 1000,
-                            play: true  
-                        }       
-                    })
-                }
-            },1000)
-        } else if (play === true){
-            this.setState(state => {
-                clearInterval(this.myInterval)
-                return {
-                    play: state.play = false,
-                }
-            })   
-        }  
+            console.log("click another button")
+        }     
     }
 
     render(){
@@ -137,7 +134,7 @@ class App extends React.Component {
                         
                     </div>
                     <div className="ppr">
-                        <button id="start_stop" onClick={this.startStopTime}><FontAwesomeIcon icon={faPlay} /><FontAwesomeIcon icon={faPause} /></button>
+                        <button id="start_stop" onClick={this.handleClick}><FontAwesomeIcon icon={faPlay} /><FontAwesomeIcon icon={faPause} /></button>
                         <button id="reset" onClick={this.handleClick}><FontAwesomeIcon icon={faSyncAlt} /></button>
                     </div>
                 </div>
