@@ -10,11 +10,12 @@ class App extends React.Component {
     constructor(){
         super()
         this.state = {
-            play: false,
+            active: false,
+            mode: 'Session',
             breakLength: 5,
             sessionLength: 25,
-            sessionLeft: .1 * 60 * 1000,
-            breakLeft: .1 * 60 * 1000
+            sessionLeft: 25 * 60 * 1000,
+            breakLeft: 5 * 60 * 1000
         }
     }
 
@@ -58,44 +59,39 @@ class App extends React.Component {
                     })
                 break;
             case "reset":
-                    this.setState(state => {
-                        clearInterval(this.myInterval)
-                        return {
-                            play: false,
+                    clearInterval(this.myInterval)
+                    this.setState({
+                            active: false,
+                            mode: "Session",
                             breakLength: 5,
                             sessionLength: 25,
                             sessionLeft: 25 * 60 * 1000,
-                            breakLeft: 5 * 60 * 1000
-                        }
+                            breakLeft: 5 * 60 * 1000 
                     })
                 break;
             case "start_stop":
-                let {play} = this.state
-                if (play === false) {
+                if (this.state.active === false) {
                     this.myInterval = setInterval(() => {
-                        if (this.state.sessionLeft !== 0){
-                            this.setState(state => {
-                                let {sessionLeft} = state
-                                return {
-                                    sessionLeft: sessionLeft - 1000,
-                                    play: true
-                                }     
+                        if (this.state.mode === 'Session'){
+                            this.setState({
+                                active: true,
+                                sessionLeft: this.state.sessionLeft - 1000,
+                                mode: this.state.sessionLeft === 0 ? 'Break' : 'Session',
+                                breakLeft: this.state.breakLength * 60 * 1000
                             })
-                        } else if (this.state.sessionLeft === 0){
-                            this.setState(state => {
-                                return {
-                                    sessionLeft: 0,
-                                    breakLeft: state.breakLeft === 0 ? state.breakLeft = 0 : state.breakLeft - 1000,
-                                    play: true  
-                                }       
+                        } else if (this.state.mode === 'Break'){
+                            this.setState({
+                                breakLeft: this.state.breakLeft - 1000,
+                                mode: this.state.breakLeft === 0 ? 'Session' : 'Break',
+                                sessionLeft: this.state.sessionLength * 60 * 1000
                             })
                         }
                     },1000)
-                } else if (play === true){
+                } else if (this.state.active === true){
                     this.setState(state => {
                         clearInterval(this.myInterval)
                         return {
-                            play: state.play = false,
+                            active: state.active = false,
                         }
                     })   
                 }
@@ -129,8 +125,9 @@ class App extends React.Component {
                         </div>
                     </div>
                     <div className="timer">        
-                        {this.state.sessionLeft >= 1000 ? <p id="timer-label">Session</p> : <p id="timer-label">Break</p>}
-                        {this.state.sessionLeft >= 1000 ? <p id="time-left">{moment(this.state.sessionLeft).format("mm:ss")}</p> : <p id="time-left">{moment(this.state.breakLeft).format("mm:ss")}</p>}
+                        <p id="timer-label">{this.state.mode}</p>
+                        {this.state.mode === "Session" ? <p id="time-left">{moment(this.state.sessionLeft).format("mm:ss")}</p> : <p id="time-left">{moment(this.state.breakLeft).format("mm:ss")}</p>}
+                        
                         
                     </div>
                     <div className="ppr">
