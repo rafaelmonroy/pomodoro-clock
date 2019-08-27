@@ -2,6 +2,7 @@ import React from "react";
 import ReactFCCtest from 'react-fcctest';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowUp, faArrowDown, faPlay, faPause, faSyncAlt } from '@fortawesome/free-solid-svg-icons'
+import beep from './beeping.mp3'
 
 import "./styles.css";
 import moment from 'moment'
@@ -17,6 +18,16 @@ class App extends React.Component {
             sessionLeft: 25 * 60 * 1000,
             breakLeft: 5 * 60 * 1000
         }
+    }
+
+    play = () => {
+        document.getElementById("beep").play();
+    }
+
+    componentDidUpdate(){
+        if (this.state.sessionLeft === 0 || this.state.breakLeft === 0){
+            this.play()
+        } 
     }
 
     handleClick = (event) => {
@@ -59,6 +70,8 @@ class App extends React.Component {
                     })
                 break;
             case "reset":
+                    document.getElementById("beep").pause();
+                    document.getElementById("beep").currentTime = 0;
                     clearInterval(this.myInterval)
                     this.setState({
                             active: false,
@@ -72,7 +85,7 @@ class App extends React.Component {
             case "start_stop":
                 if (this.state.active === false) {
                     this.myInterval = setInterval(() => {
-                        if (this.state.mode === 'Session'){
+                        if (this.state.mode === 'Session' ){
                             this.setState({
                                 active: true,
                                 sessionLeft: this.state.sessionLeft - 1000,
@@ -80,6 +93,7 @@ class App extends React.Component {
                                 breakLeft: this.state.breakLength * 60 * 1000
                             })
                         } else if (this.state.mode === 'Break'){
+                            this.play()
                             this.setState({
                                 breakLeft: this.state.breakLeft - 1000,
                                 mode: this.state.breakLeft === 0 ? 'Session' : 'Break',
@@ -133,6 +147,7 @@ class App extends React.Component {
                     <div className="ppr">
                         <button id="start_stop" onClick={this.handleClick}><FontAwesomeIcon icon={faPlay} /><FontAwesomeIcon icon={faPause} /></button>
                         <button id="reset" onClick={this.handleClick}><FontAwesomeIcon icon={faSyncAlt} /></button>
+                        <audio src={beep} id="beep" />
                     </div>
                 </div>
                 <ReactFCCtest />
