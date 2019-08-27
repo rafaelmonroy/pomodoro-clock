@@ -13,10 +13,10 @@ class App extends React.Component {
         this.state = {
             active: false,
             mode: 'Session',
-            breakLength: .1,
-            sessionLength: .1,
-            sessionLeft: .1 * 60 * 1000,
-            breakLeft: .1 * 60 * 1000
+            breakLength: 5,
+            sessionLength: 25,
+            sessionLeft: 25 * 60 * 1000,
+            breakLeft: 5 * 60 * 1000
         }
     }
 
@@ -97,11 +97,10 @@ class App extends React.Component {
                                 this.setState({
                                     active: true,
                                     sessionLeft: 0,
-                                    mode: this.state.sessionLeft === 0 ? 'Break' : 'Session',
+                                    mode: 'Break',
                                     breakLeft: this.state.breakLength * 60 * 1000
                                 })
                             }
-                            
                         } else if (this.state.mode === 'Break'){
                             if (this.state.breakLeft !== 0){
                                 this.setState({
@@ -112,7 +111,7 @@ class App extends React.Component {
                                 this.setState({
                                     active: true,
                                     breakLeft: 0,
-                                    mode: this.state.breakLeft === 0 ? 'Session' : 'Break',
+                                    mode: 'Session',
                                     sessionLeft: this.state.sessionLength * 60 * 1000
                                 })
                             }
@@ -157,10 +156,7 @@ class App extends React.Component {
                     </div>
                     <div className="timer">        
                         <p id="timer-label">{this.state.mode}</p>
-                        {this.state.mode === "Session" ? <p id="time-left">{moment(this.state.sessionLeft).format('mm:ss')}</p> : <p id="time-left">{moment(this.state.breakLeft).format('mm:ss')}</p>}
-                        <p >{moment(this.state.sessionLeft).format('mm:ss')}</p>
-                        <p>{moment(this.state.breakLeft).format('mm:ss')}</p>
-                        
+                        {this.state.mode === "Session" ? <p id="time-left">{moment(this.state.sessionLeft).format('mm:ss')}</p> : <p id="time-left">{moment(this.state.breakLeft).format('mm:ss')}</p>}                     
                     </div>
                     <div className="ppr">
                         <button id="start_stop" onClick={this.handleClick}><FontAwesomeIcon icon={faPlay} /><FontAwesomeIcon icon={faPause} /></button>
