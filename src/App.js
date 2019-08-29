@@ -5,7 +5,6 @@ import { faArrowUp, faArrowDown, faPlay, faPause, faSyncAlt } from '@fortawesome
 import beep from './beeping.mp3'
 
 import "./styles.css";
-import moment from 'moment'
 
 class App extends React.Component {
     constructor(){
@@ -18,6 +17,7 @@ class App extends React.Component {
             sessionLeft: 25 * 60 * 1000,
             breakLeft: 5 * 60 * 1000
         }
+        
     }
 
     play = () => {
@@ -131,6 +131,39 @@ class App extends React.Component {
         }     
     }
 
+    convertMilliseconds = (ms, p) => {
+        let pattern = p,
+			arrayPattern = pattern.split(":"),
+			clock = [ ],
+			minutes = Math.floor ( ms / 60000), // 1 Minutes = 60000 Milliseconds
+			seconds = Math.floor ((( ms % 360000) % 60000) / 1000) // 1 Second = 1000 Milliseconds	
+		// build the clock result
+		function createClock(unit){
+		// match the pattern to the corresponding variable
+		if (pattern.match(unit)) {
+			if (unit.match(/mm/)) {
+				addUnitToClock(minutes, unit);
+			}
+			if (unit.match(/ss/)) {
+				addUnitToClock(seconds, unit);
+			};
+			}
+		}
+		function addUnitToClock(val, unit){	
+			if ( val < 10 && unit.length === 2) {
+				val = "0" + val;
+			}	
+			clock.push(val); // push the values into the clock array		
+		}
+		// loop over the pattern building out the clock result
+		for ( var i = 0, j = arrayPattern.length; i < j; i ++ ){	
+			createClock(arrayPattern[i]);		
+		}
+		return clock.join(":")
+    }
+
+    
+
     render(){
         return (
             <div className="App">
@@ -156,7 +189,7 @@ class App extends React.Component {
                     </div>
                     <div className="timer">        
                         <p id="timer-label">{this.state.mode}</p>
-                        {this.state.mode === "Session" ? <p id="time-left">{moment(this.state.sessionLeft).format('mm:ss')}</p> : <p id="time-left">{moment(this.state.breakLeft).format('mm:ss')}</p>}                     
+                        {this.state.mode === "Session" ? <p id="time-left">{this.convertMilliseconds(this.state.sessionLeft, "mm:ss")}</p> : <p id="time-left">{this.convertMilliseconds(this.state.breakLeft, "mm:ss")}</p>}                     
                     </div>
                     <div className="ppr">
                         <button id="start_stop" onClick={this.handleClick}><FontAwesomeIcon icon={faPlay} /><FontAwesomeIcon icon={faPause} /></button>
